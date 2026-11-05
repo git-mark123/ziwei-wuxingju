@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫微斗数 · 五行局速查</title>
+<meta name="description" content="输入公历生辰与时辰，自动换算农历、安命宫，按命宫干支纳音五行定紫微斗数五行局（水二局、木三局、金四局、土五局、火六局）。零依赖、离线可用。">
+<meta property="og:title" content="紫微斗数 · 五行局速查">
+<meta property="og:description" content="输入公历生辰与时辰，一键查出你的紫微斗数五行局。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23a03028'/%3E%3Cpath d='M16 6l2.7 6.5L25 13l-5.2 4.4 1.7 6.9L16 20.7l-5.5 3.6l1.7-6.9L7 13l6.3-.5z' fill='%23f6f1e7'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --paper: #f6f1e7;
+    --card: #fffdf7;
+    --ink: #2d2821;
+    --ink-soft: #6b6256;
+    --cinnabar: #a03028;
+    --cinnabar-deep: #7e241e;
+    --gold: #b08a4a;
+    --line: #e3d9c3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(176, 138, 74, .12), transparent 60%),
+      radial-gradient(900px 600px at 90% 110%, rgba(160, 48, 40, .06), transparent 55%),
+      var(--paper);
+    min-height: 100vh;
+    padding: 40px 16px 60px;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 26px; }
+  .seal {
+    display: inline-block;
+    width: 52px; height: 52px;
+    background: var(--cinnabar);
+    color: #fdf6e3;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 52px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 2px rgba(253, 246, 227, .55);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+    text-indent: 2px;
+  }
+  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: 3px; font-weight: 700; }
+  .sub { color: var(--ink-soft); font-size: 14px; margin: 0; letter-spacing: 1px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(60, 50, 30, .08);
+    padding: 28px 28px 22px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field > label { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; letter-spacing: 1px; }
+  .field input[type="date"], .field select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: #fffdf7;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input[type="date"]:focus, .field select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(176, 138, 74, .15);
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    font-family: inherit;
+    font-size: 17px;
+    letter-spacing: 6px;
+    text-indent: 6px;
+    color: #fdf6e3;
+    background: linear-gradient(180deg, var(--cinnabar), var(--cinnabar-deep));
+    border: none;
+    border-radius: 9px;
+    padding: 13px 0;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(126, 36, 30, .25);
+    transition: transform .1s, box-shadow .15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(126, 36, 30, .3); }
+  .btn:active { transform: translateY(0); }
+
+  .examples { margin: 14px 0 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .examples button {
+    font-family: inherit; font-size: 12.5px; color: var(--ink-soft);
+    background: transparent; border: 1px dashed var(--gold); border-radius: 999px;
+    padding: 5px 14px; cursor: pointer; transition: all .15s;
+  }
+  .examples button:hover { color: var(--cinnabar); border-color: var(--cinnabar); background: rgba(160,48,40,.05); }
+
+  .msg { display: none; margin-top: 14px; text-align: center; color: var(--cinnabar); font-size: 14px; }
+  .msg.show { display: block; }
+
+  #result { display: none; margin-top: 24px; border-top: 1px dashed var(--line); padding-top: 22px; text-align: center; }
+  #result.show { display: block; animation: rise .35s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .ju-label { font-size: 13px; color: var(--ink-soft); letter-spacing: 3px; }
+  .ju-big {
+    font-size: 60px; font-weight: 700; color: var(--cinnabar);
+    line-height: 1.2; letter-spacing: 6px; text-indent: 6px;
+    margin: 2px 0 4px;
+    text-shadow: 0 2px 0 rgba(126,36,30,.15);
+  }
+  .ju-nayin { font-size: 14px; color: var(--gold); letter-spacing: 2px; }
+
+  .detail-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin-top: 20px; text-align: center;
+  }
+  @media (max-width: 480px) { .detail-grid { grid-template-columns: repeat(2, 1fr); } }
+  .detail {
+    background: #faf6ec; border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 6px;
+  }
+  .detail .k { font-size: 12px; color: var(--ink-soft); letter-spacing: 1px; }
+  .detail .v { font-size: 16px; margin-top: 2px; font-weight: 600; letter-spacing: 1px; }
+  .detail .v small { font-weight: 400; color: var(--ink-soft); font-size: 12px; }
+
+  details.reference { margin-top: 26px; border-top: 1px dashed var(--line); padding-top: 16px; }
+  summary {
+    cursor: pointer; font-size: 14px; color: var(--ink-soft);
+    letter-spacing: 2px; user-select: none;
+  }
+  summary:hover { color: var(--cinnabar); }
+  .ju-table { margin-top: 14px; }
+  .ju-row { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px dotted var(--line); align-items: baseline; }
+  .ju-row .name { flex: 0 0 68px; font-weight: 700; color: var(--cinnabar); font-size: 14px; }
+  .ju-row .list { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; color: var(--ink); }
+
+  .notes { margin-top: 22px; font-size: 12px; color: var(--ink-soft); }
+  .notes p { margin: 4px 0; }
+  footer { text-align: center; margin-top: 26px; font-size: 12px; color: #9a917f; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="seal">紫微</span>
+    <h1>五行局速查</h1>
+    <p class="sub">紫微斗数 · 输入公历生辰与时辰，一键查出你的五行局</p>
+  </header>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label for="birth">公历出生日期</label>
+        <input type="date" id="birth" min="1900-01-31" max="2100-12-31" required>
+      </div>
+      <div class="field">
+        <label for="hour">出生时辰</label>
+        <select id="hour" required>
+          <option value="">— 请选择时辰 —</option>
+          <option value="0">子时（23:00–00:59）</option>
+          <option value="1">丑时（01:00–02:59）</option>
+          <option value="2">寅时（03:00–04:59）</option>
+          <option value="3">卯时（05:00–06:59）</option>
+          <option value="4">辰时（07:00–08:59）</option>
+          <option value="5">巳时（09:00–10:59）</option>
+          <option value="6">午时（11:00–12:59）</option>
+          <option value="7">未时（13:00–14:59）</option>
+          <option value="8">申时（15:00–16:59）</option>
+          <option value="9">酉时（17:00–18:59）</option>
+          <option value="10">戌时（19:00–20:59）</option>
+          <option value="11">亥时（21:00–22:59）</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="rule">年界规则（流派差异，默认主流排盘口径）</label>
+      <select id="rule">
+        <option value="lichun" selected>立春为年界（主流排盘软件口径）</option>
+        <option value="newyear">正月初一为年界（《紫微斗数全书》太阴历口径）</option>
+      </select>
+    </div>
+    <button class="btn" id="go">查五行局</button>
+
+    <div class="examples">
+      <button data-ex="1990-06-15|6">例：1990-06-15 午时</button>
+      <button data-ex="1986-05-09|6">例：1986-05-09 午时</button>
+      <button data-ex="2024-02-10|0">例：2024-02-10 子时</button>
+    </div>
+
+    <p class="msg" id="msg"></p>
+
+    <div id="result">
+      <div class="ju-label">你的五行局</div>
+      <div class="ju-big" id="ju"></div>
+      <div class="ju-nayin" id="nayin"></div>
+      <div class="detail-grid">
+        <div class="detail"><div class="k">农历生日</div><div class="v" id="d-lunar"></div></div>
+        <div class="detail"><div class="k">年柱</div><div class="v" id="d-year"></div></div>
+        <div class="detail"><div class="k">命宫</div><div class="v" id="d-ming"></div></div>
+        <div class="detail"><div class="k">纳音</div><div class="v" id="d-nayin"></div></div>
+      </div>
+    </div>
+
+    <details class="reference">
+      <summary>五行局对照表（命宫干支 → 局）</summary>
+      <div class="ju-table" id="juTable"></div>
+    </details>
+
+    <div class="notes">
+      <p>· 五行局以「命宫干支」的纳音五行定局：金→金四局、水→水二局、木→木三局、土→土五局、火→火六局。</p>
+      <p>· 命宫由生月与生时推出，故需完整的出生年月日时；年柱（五虎遁）用年界规则换算。</p>
+      <p>· 立春按节气精确取值；数据范围 1900-01-31 至 2100-12-31。供传统文化学习参考。</p>
+    </div>
+  </div>
+
+  <footer>紫微斗数 · 五行局速查 &nbsp;|&nbsp; 零依赖 · 可离线使用 · MIT License</footer>
+</div>
+
+<script src="ziwei.js"></script>
+<script>
+(function () {
+  'use strict';
+  var CN_MONTH = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+  var CN_DAY = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+    '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+    '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+
+  function lunarText(lu) {
+    return lu.lYear + '年 ' + (lu.isLeap ? '闰' : '') + CN_MONTH[lu.lMonth - 1] + '月' + CN_DAY[lu.lDay - 1];
+  }
+
+  function renderJuTable() {
+    var table = Ziwei.juTable();
+    var order = ['水二局', '木三局', '金四局', '土五局', '火六局'];
+    var html = order.map(function (name) {
+      return '<div class="ju-row"><span class="name">' + name + '</span><span class="list">' +
+        table[name].map(function (gz) { return gz + '（' + Ziwei.NAYIN[gz] + '）'; }).join('') +
+        '</span></div>';
+    }).join('');
+    document.getElementById('juTable').innerHTML = html;
+  }
+
+  function showError(text) {
+    var msg = document.getElementById('msg');
+    msg.textContent = text;
+    msg.classList.add('show');
+    document.getElementById('result').classList.remove('show');
+  }
+
+  function run(dateStr, hourIdx) {
+    var msg = document.getElementById('msg');
+    msg.classList.remove('show');
+    if (!dateStr) { showError('请选择公历出生日期'); return; }
+    var parts = dateStr.split('-');
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+    if (hourIdx === '' || hourIdx === null) { showError('请选择出生时辰（命宫由月与时定，缺一不可）'); return; }
+    hourIdx = parseInt(hourIdx, 10);
+
+    var rule = document.getElementById('rule').value;
+    var r = Ziwei.calc(y, m, d, hourIdx, rule);
+    if (!r) { showError('日期超出数据范围（1900-01-31 至 2100-12-31）'); return; }
+
+    document.getElementById('ju').textContent = r.ju;
+    document.getElementById('nayin').textContent = '命宫 ' + r.mingGong + ' · ' + r.nayin;
+    document.getElementById('d-lunar').textContent = lunarText(r.lunar);
+    document.getElementById('d-year').textContent = r.gzYear;
+    document.getElementById('d-ming').innerHTML = r.mingGong + ' <small>命宫在' + r.mingGongZhi + '</small>';
+    document.getElementById('d-nayin').textContent = r.nayin;
+    document.getElementById('result').classList.add('show');
+  }
+
+  document.getElementById('go').addEventListener('click', function () {
+    run(document.getElementById('birth').value, document.getElementById('hour').value);
+  });
+  document.querySelectorAll('.examples button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var parts = btn.getAttribute('data-ex').split('|');
+      document.getElementById('birth').value = parts[0];
+      document.getElementById('hour').value = parts[1];
+      run(parts[0], parts[1]);
+    });
+  });
+  document.getElementById('birth').addEventListener('keydown', function (e) { if (e.key === 'Enter') run(this.value, document.getElementById('hour').value); });
+  document.getElementById('hour').addEventListener('change', function () { if (document.getElementById('birth').value) run(document.getElementById('birth').value, this.value); });
+
+  renderJuTable();
+})();
+</script>
+</body>
+</html>
